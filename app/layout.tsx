@@ -38,7 +38,7 @@ export default function RootLayout({
             <SidebarInset>
               <div className="flex flex-col gap-5 flex-1">
                 <Nav />
-                <main className="container mx-auto h-full w-full">
+                <main className="container mx-auto h-full w-full px-4">
                   {children}
                 </main>
               </div>

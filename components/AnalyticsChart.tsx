@@ -93,7 +93,7 @@ export function AnalyticsChart() {
 
   return (
     <>
-      <Card className="mb-5 bg-sidebar">
+      <Card className="mb-5 bg-sidebar rounded-none">
         <CardHeader>
           <CardTitle>Overall Analytics</CardTitle>
           <CardDescription>
@@ -101,47 +101,48 @@ export function AnalyticsChart() {
           </CardDescription>
         </CardHeader>
       </Card>
-      <Card className="bg-sidebar">
-        <CardContent>
-          <ChartContainer config={chartConfig}>
-            <ResponsiveContainer width="50%" height={100}>
-              <BarChart
-                data={chartData}
-                layout="vertical"
-                margin={{
-                  left: 0,
-                  right: 0,
-                  top: 0,
-                  bottom: 0,
-                }}
-              >
-                <YAxis
-                  dataKey="category"
-                  type="category"
-                  tickLine={false}
-                  tickMargin={10}
-                  axisLine={false}
-                />
-                <XAxis dataKey="value" type="number" hide />
-                <ChartTooltip
-                  cursor={false}
-                  content={<ChartTooltipContent hideLabel />}
-                />
-                <Bar dataKey="value" layout="vertical" radius={4}>
-                  {chartData.map((entry, index) => (
-                    <Cell
-                      key={`cell-${index}`}
-                      fill={
-                        chartConfig[entry.category as keyof typeof chartConfig]
-                          .color
-                      }
-                    />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </ChartContainer>
-        </CardContent>
+      <Card className="bg-sidebar py-5 rounded-none">
+        <ChartContainer
+          config={chartConfig}
+          className="min-h-[100px] max-h-[400px]"
+        >
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart
+              data={chartData}
+              layout="vertical"
+              margin={{
+                left: 0,
+                right: 0,
+                top: 0,
+                bottom: 0,
+              }}
+            >
+              <YAxis
+                dataKey="category"
+                type="category"
+                tickLine={false}
+                tickMargin={10}
+                axisLine={false}
+              />
+              <XAxis dataKey="value" type="number" hide />
+              <ChartTooltip
+                cursor={false}
+                content={<ChartTooltipContent hideLabel />}
+              />
+              <Bar dataKey="value" layout="vertical" radius={4}>
+                {chartData.map((entry, index) => (
+                  <Cell
+                    key={`cell-${index}`}
+                    fill={
+                      chartConfig[entry.category as keyof typeof chartConfig]
+                        .color
+                    }
+                  />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </ChartContainer>
       </Card>
     </>
   );

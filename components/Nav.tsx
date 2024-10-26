@@ -4,7 +4,7 @@ import { SidebarTrigger } from "./ui/sidebar";
 
 const Nav = () => {
   return (
-    <nav className="h-[4.3rem] w-full ">
+    <nav className="h-[4.3rem] w-full">
       <Card className="h-full rounded-none bg-sidebar flex items-center">
         <SidebarTrigger />
 

@@ -2,11 +2,7 @@ import { AnalyticsChart } from "@/components/AnalyticsChart";
 import React from "react";
 
 const Page = () => {
-  return (
-    <div className="">
-      <AnalyticsChart />
-    </div>
-  );
+  return <AnalyticsChart />;
 };
 
 export default Page;

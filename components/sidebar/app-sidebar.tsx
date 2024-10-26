@@ -11,6 +11,8 @@ import {
 import {
   Sidebar,
   SidebarContent,
+  SidebarGroup,
+  SidebarGroupContent,
   SidebarHeader,
   SidebarRail,
 } from "@/components/ui/sidebar";
@@ -28,18 +30,22 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
         <div className="p-4 space-y-4">
-          <div>
+          <div className="">
             <label className="block text-sm font-medium mb-1">Date</label>
-            <Calendar
-              mode="single"
-              selected={selectedDate}
-              onSelect={(date) => date && setSelectedDate(date)}
-              className="rounded-md border"
-              initialFocus
-              defaultMonth={new Date(2022, 9)} // Set default month to October 2022
-              fromDate={parse("04/10/2022", "dd/MM/yyyy", new Date())}
-              toDate={parse("29/10/2022", "dd/MM/yyyy", new Date())}
-            />
+            <SidebarGroup className="px-0 sm:translate-x-[-20px]">
+              <SidebarGroupContent>
+                <Calendar
+                  mode="single"
+                  selected={selectedDate}
+                  onSelect={(date) => date && setSelectedDate(date)}
+                  className="[&_[role=gridcell].bg-accent]:bg-sidebar-primary [&_[role=gridcell].bg-accent]:text-sidebar-primary-foreground [&_[role=gridcell]]:w-[33px]"
+                  initialFocus
+                  defaultMonth={new Date(2022, 9)} // Set default month to October 2022
+                  fromDate={parse("04/10/2022", "dd/MM/yyyy", new Date())}
+                  toDate={parse("29/10/2022", "dd/MM/yyyy", new Date())}
+                />
+              </SidebarGroupContent>
+            </SidebarGroup>
           </div>
           <div>
             <label className="block text-sm font-medium mb-1">Age</label>
