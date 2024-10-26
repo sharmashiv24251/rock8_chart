@@ -1,4 +1,5 @@
 "use client";
+
 import * as React from "react";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -20,8 +21,15 @@ import { useAnalyticsStore } from "@/store";
 import { parse } from "date-fns";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const { selectedDate, age, gender, setSelectedDate, setAge, setGender } =
-    useAnalyticsStore();
+  const {
+    selectedDate,
+    age,
+    gender,
+    selectedFeature,
+    setSelectedDate,
+    setAge,
+    setGender,
+  } = useAnalyticsStore();
 
   return (
     <Sidebar {...props}>
@@ -40,9 +48,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   onSelect={(date) => date && setSelectedDate(date)}
                   className="[&_[role=gridcell].bg-accent]:bg-sidebar-primary [&_[role=gridcell].bg-accent]:text-sidebar-primary-foreground [&_[role=gridcell]]:w-[33px]"
                   initialFocus
-                  defaultMonth={new Date(2022, 9)} // Set default month to October 2022
+                  defaultMonth={new Date(2022, 9)}
                   fromDate={parse("04/10/2022", "dd/MM/yyyy", new Date())}
                   toDate={parse("29/10/2022", "dd/MM/yyyy", new Date())}
+                  disabled={selectedFeature !== null}
                 />
               </SidebarGroupContent>
             </SidebarGroup>

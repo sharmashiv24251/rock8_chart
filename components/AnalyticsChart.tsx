@@ -1,15 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import {
-  Bar,
-  BarChart,
-  XAxis,
-  YAxis,
-  Cell,
-  ResponsiveContainer,
-} from "recharts";
-import { format, parse } from "date-fns";
+import { format } from "date-fns";
 import {
   Card,
   CardContent,
@@ -17,14 +9,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  ChartConfig,
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-} from "@/components/ui/chart";
+import { ChartConfig } from "@/components/ui/chart";
 import analyticsData from "@/analytics.json";
 import { useAnalyticsStore } from "@/store";
+import { FeaturesBarChart } from "./FeaturesBarChart";
+import { FeaturesLineChart } from "./FeaturesLineChart";
 
 const chartConfig: ChartConfig = {
   A: { label: "A", color: "hsl(var(--chart-1))" },
@@ -37,10 +26,11 @@ const chartConfig: ChartConfig = {
 
 export function AnalyticsChart() {
   const { selectedDate, age, gender } = useAnalyticsStore();
-  const [chartData, setChartData] = useState<any[]>([]);
+  const [barChartData, setBarChartData] = useState<any[]>([]);
+  const [lineChartData, setLineChartData] = useState<any[]>([]);
+  const [selectedFeature, setSelectedFeature] = useState<string | null>(null);
 
   useEffect(() => {
-    // Change the format to match the JSON data format
     const formattedDate = format(selectedDate, "d/M/yyyy");
     let filteredData = analyticsData.analytics.filter(
       (item) => item.Day === formattedDate
@@ -63,19 +53,44 @@ export function AnalyticsChart() {
         return acc;
       }, {} as Record<string, number>);
 
-      const newChartData = Object.entries(aggregatedData).map(
+      const newBarChartData = Object.entries(aggregatedData).map(
         ([key, value]) => ({
           category: key,
           value: value,
         })
       );
-      setChartData(newChartData);
+      setBarChartData(newBarChartData);
     } else {
-      setChartData([]);
+      setBarChartData([]);
     }
   }, [selectedDate, age, gender]);
 
-  if (chartData.length === 0) {
+  useEffect(() => {
+    if (selectedFeature) {
+      let filteredData = analyticsData.analytics;
+
+      if (age !== "All") {
+        filteredData = filteredData.filter((item) => item.Age === age);
+      }
+
+      if (gender !== "All") {
+        filteredData = filteredData.filter((item) => item.Gender === gender);
+      }
+
+      const newLineChartData = filteredData.map((item) => ({
+        date: item.Day,
+        value: item[selectedFeature as keyof typeof item] as number,
+      }));
+
+      setLineChartData(newLineChartData);
+    }
+  }, [selectedFeature, age, gender]);
+
+  const handleFeatureClick = (feature: string) => {
+    setSelectedFeature(feature);
+  };
+
+  if (barChartData.length === 0 && !selectedFeature) {
     return (
       <Card>
         <CardHeader>
@@ -95,54 +110,37 @@ export function AnalyticsChart() {
     <>
       <Card className="mb-5 bg-sidebar rounded-none">
         <CardHeader>
-          <CardTitle>Overall Analytics</CardTitle>
-          <CardDescription>
-            {format(selectedDate, "MMMM d, yyyy")} | {gender} | {age}
+          <CardTitle className="text-2xl">Overall Analytics</CardTitle>
+          <CardDescription className="text-xl">
+            {selectedFeature
+              ? `Trend for Feature ${selectedFeature}`
+              : `${format(selectedDate, "MMMM d, yyyy")} | ${gender} | ${age}`}
           </CardDescription>
         </CardHeader>
       </Card>
       <Card className="bg-sidebar py-5 rounded-none">
-        <ChartContainer
-          config={chartConfig}
-          className="min-h-[100px] max-h-[400px]"
-        >
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart
-              data={chartData}
-              layout="vertical"
-              margin={{
-                left: 0,
-                right: 0,
-                top: 0,
-                bottom: 0,
-              }}
-            >
-              <YAxis
-                dataKey="category"
-                type="category"
-                tickLine={false}
-                tickMargin={10}
-                axisLine={false}
-              />
-              <XAxis dataKey="value" type="number" hide />
-              <ChartTooltip
-                cursor={false}
-                content={<ChartTooltipContent hideLabel />}
-              />
-              <Bar dataKey="value" layout="vertical" radius={4}>
-                {chartData.map((entry, index) => (
-                  <Cell
-                    key={`cell-${index}`}
-                    fill={
-                      chartConfig[entry.category as keyof typeof chartConfig]
-                        .color
-                    }
-                  />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
-        </ChartContainer>
+        <CardHeader className="">
+          <CardTitle className="text-2xl">
+            {selectedFeature
+              ? `Trend for Feature ${selectedFeature}`
+              : "Select A Feature"}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {selectedFeature ? (
+            <FeaturesLineChart
+              data={lineChartData}
+              config={chartConfig}
+              selectedFeature={selectedFeature}
+            />
+          ) : (
+            <FeaturesBarChart
+              data={barChartData}
+              config={chartConfig}
+              onFeatureClick={handleFeatureClick}
+            />
+          )}
+        </CardContent>
       </Card>
     </>
   );
