@@ -15,10 +15,10 @@ import {
   SidebarGroup,
   SidebarGroupContent,
   SidebarHeader,
-  SidebarRail,
 } from "@/components/ui/sidebar";
 import { useAnalyticsStore } from "@/store";
-import { parse } from "date-fns";
+import { parse, format } from "date-fns";
+import { useRouter } from "next/navigation";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const {
@@ -30,6 +30,15 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     setAge,
     setGender,
   } = useAnalyticsStore();
+  const router = useRouter();
+
+  const updateUrl = (params: { [key: string]: string }) => {
+    const searchParams = new URLSearchParams(window.location.search);
+    Object.entries(params).forEach(([key, value]) => {
+      searchParams.set(key, value);
+    });
+    router.push(`?${searchParams.toString()}`, { scroll: false });
+  };
 
   return (
     <Sidebar {...props}>
@@ -45,7 +54,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 <Calendar
                   mode="single"
                   selected={selectedDate}
-                  onSelect={(date) => date && setSelectedDate(date)}
+                  onSelect={(date) => {
+                    if (date) {
+                      setSelectedDate(date);
+                      updateUrl({ date: format(date, "dd-MM-yyyy") });
+                    }
+                  }}
                   className="[&_[role=gridcell].bg-accent]:bg-sidebar-primary [&_[role=gridcell].bg-accent]:text-sidebar-primary-foreground [&_[role=gridcell]]:w-[33px]"
                   initialFocus
                   defaultMonth={new Date(2022, 9)}
@@ -58,7 +72,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </div>
           <div>
             <label className="block text-sm font-medium mb-1">Age</label>
-            <Select value={age} onValueChange={setAge}>
+            <Select
+              value={age}
+              onValueChange={(value) => {
+                setAge(value as "All" | "15-25" | ">25");
+                updateUrl({ age: value });
+              }}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Select age range" />
               </SelectTrigger>
@@ -71,7 +91,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </div>
           <div>
             <label className="block text-sm font-medium mb-1">Gender</label>
-            <Select value={gender} onValueChange={setGender}>
+            <Select
+              value={gender}
+              onValueChange={(value) => {
+                setGender(value as "All" | "Male" | "Female");
+                updateUrl({ gender: value.toLowerCase() });
+              }}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Select gender" />
               </SelectTrigger>
@@ -84,7 +110,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </div>
         </div>
       </SidebarContent>
-      <SidebarRail />
     </Sidebar>
   );
 }

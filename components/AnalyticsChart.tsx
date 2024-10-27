@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { format } from "date-fns";
+import { useRouter } from "next/navigation";
 import {
   Card,
   CardContent,
@@ -9,12 +10,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { ChartConfig } from "@/components/ui/chart";
 import analyticsData from "@/analytics.json";
 import { useAnalyticsStore } from "@/store";
 import { FeaturesBarChart } from "./FeaturesBarChart";
 import { FeaturesLineChart } from "./FeaturesLineChart";
 import { ChevronLeft } from "lucide-react";
+import { parseUrlParams } from "@/utils/urlParams";
 
 const chartConfig: ChartConfig = {
   A: { label: "A", color: "hsl(var(--chart-1))" },
@@ -26,10 +29,29 @@ const chartConfig: ChartConfig = {
 };
 
 export function AnalyticsChart() {
-  const { selectedDate, age, gender } = useAnalyticsStore();
+  const {
+    selectedDate,
+    age,
+    gender,
+    selectedFeature,
+    setMultipleValues,
+    resetToDefault,
+  } = useAnalyticsStore();
   const [barChartData, setBarChartData] = useState<any[]>([]);
   const [lineChartData, setLineChartData] = useState<any[]>([]);
-  const [selectedFeature, setSelectedFeature] = useState<string | null>(null);
+  const router = useRouter();
+
+  useEffect(() => {
+    const urlParams = parseUrlParams();
+    if (urlParams) {
+      setMultipleValues({
+        selectedFeature: urlParams.feature,
+        gender: urlParams.gender as "All" | "Male" | "Female",
+        age: urlParams.age as "All" | "15-25" | ">25",
+        selectedDate: urlParams.date || selectedDate,
+      });
+    }
+  }, []);
 
   useEffect(() => {
     const formattedDate = format(selectedDate, "d/M/yyyy");
@@ -88,15 +110,38 @@ export function AnalyticsChart() {
   }, [selectedFeature, age, gender]);
 
   const handleFeatureClick = (feature: string) => {
-    setSelectedFeature(feature);
+    setMultipleValues({ selectedFeature: feature });
+    updateUrl({ feature });
+  };
+
+  const handleBackClick = () => {
+    setMultipleValues({ selectedFeature: null });
+    updateUrl({ feature: null });
+  };
+
+  const handleResetFilters = () => {
+    resetToDefault();
+    router.push("/", { scroll: false });
+  };
+
+  const updateUrl = (params: { [key: string]: string | null }) => {
+    const searchParams = new URLSearchParams(window.location.search);
+    Object.entries(params).forEach(([key, value]) => {
+      if (value === null) {
+        searchParams.delete(key);
+      } else {
+        searchParams.set(key, value);
+      }
+    });
+    router.push(`?${searchParams.toString()}`, { scroll: false });
   };
 
   if (barChartData.length === 0 && !selectedFeature) {
     return (
-      <Card>
+      <Card className="mb-5 bg-sidebar rounded-none">
         <CardHeader>
-          <CardTitle>Overall Analytics</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-2xl">Overall Analytics</CardTitle>
+          <CardDescription className="text-xl">
             {format(selectedDate, "MMMM d, yyyy")} | {gender} | {age}
           </CardDescription>
         </CardHeader>
@@ -110,13 +155,21 @@ export function AnalyticsChart() {
   return (
     <>
       <Card className="mb-5 bg-sidebar rounded-none">
-        <CardHeader>
-          <CardTitle className="text-2xl">Overall Analytics</CardTitle>
-          <CardDescription className="text-xl">
-            {selectedFeature
-              ? `Trend for Feature ${selectedFeature}`
-              : `${format(selectedDate, "MMMM d, yyyy")} | ${gender} | ${age}`}
-          </CardDescription>
+        <CardHeader className="flex flex-row items-center justify-between max-sm:flex-col max-sm:items-start max-sm:gap-2">
+          <div>
+            <CardTitle className="text-2xl">Overall Analytics</CardTitle>
+            <CardDescription className="text-xl">
+              {selectedFeature
+                ? `Trend for Feature ${selectedFeature}`
+                : `${format(
+                    selectedDate,
+                    "MMMM d, yyyy"
+                  )} | ${gender} | ${age}`}
+            </CardDescription>
+          </div>
+          <Button size="lg" onClick={handleResetFilters}>
+            Reset filters
+          </Button>
         </CardHeader>
       </Card>
       <Card className="bg-sidebar py-5 rounded-none">
@@ -124,7 +177,7 @@ export function AnalyticsChart() {
           <CardTitle className="text-2xl">
             {selectedFeature ? (
               <div className="flex justify-start">
-                <button onClick={() => setSelectedFeature(null)}>
+                <button onClick={handleBackClick}>
                   <ChevronLeft />
                 </button>
                 Trend for Feature {selectedFeature}
