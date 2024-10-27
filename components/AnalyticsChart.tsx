@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { format } from "date-fns";
 import { useRouter } from "next/navigation";
+
 import {
   Card,
   CardContent,
@@ -18,6 +19,7 @@ import { FeaturesBarChart } from "./FeaturesBarChart";
 import { FeaturesLineChart } from "./FeaturesLineChart";
 import { ChevronLeft } from "lucide-react";
 import { parseUrlParams } from "@/utils/urlParams";
+import { CopyViewButton } from "./CopyViewButton";
 
 const chartConfig: ChartConfig = {
   A: { label: "A", color: "hsl(var(--chart-1))" },
@@ -167,9 +169,12 @@ export function AnalyticsChart() {
                   )} | ${gender} | ${age}`}
             </CardDescription>
           </div>
-          <Button size="lg" onClick={handleResetFilters}>
-            Reset filters
-          </Button>
+          <div className="flex space-x-2">
+            <CopyViewButton />
+            <Button size="lg" onClick={handleResetFilters}>
+              Reset filters
+            </Button>
+          </div>
         </CardHeader>
       </Card>
       <Card className="bg-sidebar py-5 rounded-none">
