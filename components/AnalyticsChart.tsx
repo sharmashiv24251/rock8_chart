@@ -14,6 +14,7 @@ import analyticsData from "@/analytics.json";
 import { useAnalyticsStore } from "@/store";
 import { FeaturesBarChart } from "./FeaturesBarChart";
 import { FeaturesLineChart } from "./FeaturesLineChart";
+import { ChevronLeft } from "lucide-react";
 
 const chartConfig: ChartConfig = {
   A: { label: "A", color: "hsl(var(--chart-1))" },
@@ -21,7 +22,7 @@ const chartConfig: ChartConfig = {
   C: { label: "C", color: "hsl(var(--chart-3))" },
   D: { label: "D", color: "hsl(var(--chart-4))" },
   E: { label: "E", color: "hsl(var(--chart-5))" },
-  F: { label: "F", color: "hsl(var(--chart-6))" },
+  F: { label: "F", color: "hsl(92, 100%, 100%)" },
 };
 
 export function AnalyticsChart() {
@@ -121,9 +122,16 @@ export function AnalyticsChart() {
       <Card className="bg-sidebar py-5 rounded-none">
         <CardHeader className="">
           <CardTitle className="text-2xl">
-            {selectedFeature
-              ? `Trend for Feature ${selectedFeature}`
-              : "Select A Feature"}
+            {selectedFeature ? (
+              <div className="flex justify-start">
+                <button onClick={() => setSelectedFeature(null)}>
+                  <ChevronLeft />
+                </button>
+                Trend for Feature {selectedFeature}
+              </div>
+            ) : (
+              <div>Overall Analytics</div>
+            )}
           </CardTitle>
         </CardHeader>
         <CardContent>
